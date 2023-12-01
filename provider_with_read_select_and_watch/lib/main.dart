@@ -1,7 +1,8 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
+import 'package:provider/provider.dart';
+import 'package:provider_with_read_select_and_watch/customwidgets.dart';
+import 'package:provider_with_read_select_and_watch/provider.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -12,12 +13,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        appBarTheme: const AppBarTheme(color: Colors.blue)
+    return ChangeNotifierProvider(
+      create: (_) => BasicObjectProvider(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          appBarTheme: const AppBarTheme(color: Colors.blue)
+        ),
+        home: const HomePage()
       ),
-      home: const HomePage()
     );
   }
 }
@@ -28,29 +32,19 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold(
+      appBar: AppBar(title: const Text('HomePage'), centerTitle: true),
+      body: Column(
+        children: [
+          const Row(children: [Expanded(child: EObjectWidget()), Expanded(child: CObjectWidget())]),
+          const Row(children: [Expanded(child: BasicObjectProviderWidget()),],),
+          Row(children: [
+            TextButton(onPressed: () => context.read<BasicObjectProvider>().start(), child: const Text('Start')),
+            TextButton(onPressed: () => context.read<BasicObjectProvider>().stop(), child: const Text('Stop')),
+          ])
+        ],
+      ),
+    );
   }
 }
 
-
-
-class BasicObject{
-  final String id, lastUpdated;
-  BasicObject(): id = const Uuid().v4(), lastUpdated = DateTime.now().toIso8601String();
-
-  @override
-  bool operator ==(covariant BasicObject other) => id == other.id;
-  
-  @override
-  int get hashCode => id.hashCode;  
-}
-
-@immutable
-class EObject extends BasicObject{}
-@immutable
-class CObject extends BasicObject{}
-
-class BasicObjectProvider extends ChangeNotifier{
-  late String id; late CObject cObject; late EObject eObject;
-  late StreamSubscription cObjectStreamSub, eObjectStreamSub;
-}
